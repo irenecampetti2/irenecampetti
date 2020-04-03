@@ -51,3 +51,21 @@ plot(country, cases, las=3, cex.axis=0.5)
 install.packages("ggplot2")
 library(ggplot2)   # also require(ggplot2)
 
+setwd("C:/lab/")
+
+load("spatial.RData")
+ls()
+# covid
+
+library(ggplot2)
+
+data(mpg)
+head(mpg)
+#key components: data, aes, geometry
+ggplot(mpg, aes(x=displ, y=hwy)) + geom_point()
+ggplot(mpg, aes(x=displ, y=hwy)) + geom_line()
+ggplot(mpg, aes(x=displ, y=hwy)) + geom_polygon()
+
+head(covid)
+ggplot(covid, aes(x=lon, y=lat, size=cases)) + geom_point()
+
