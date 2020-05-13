@@ -36,6 +36,23 @@ text(toy4bits, digits=2)
 plot(toy8bits)
 text(toy8bits, digits=2)
 
+##########################################
+
+setwd("C:/lab/")
+load("faPAR.RData")
+library(raster)
+library(rasterdiv)
+
+# see data
+ls()
+faPAR10
+
+#let's see how much space is needed for the 8-bit set
+writeRaster(copNDVI, "copNDVI.tif")
+
+#faPAR: levelplot this set
+library(rasterVis)
+levelplot(faPAR10)
 
 
 
