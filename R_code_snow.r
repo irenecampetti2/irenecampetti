@@ -38,3 +38,7 @@ import <- lapply(rlist,raster)
 snow.multitemp <- stack(import)
 plot(snow.multitemp,col=cl)
 
+# let's make a prediction on how the snow is expected to change in 2025
+source("prediction.r")
+
+
