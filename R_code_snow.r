@@ -41,4 +41,38 @@ plot(snow.multitemp,col=cl)
 # let's make a prediction on how the snow is expected to change in 2025
 source("prediction.r")
 
+#######################
 
+# set working directory
+setwd("C:/lab/snow/")
+
+# Exercise: import the snow cover images altogether
+library(raster)
+rlist <- list.files(pattern="snow")
+import <- lapply(rlist,raster)
+snow.multitemp <- stack(import)
+cl <- colorRampPalette(c('darkblue','blue','light blue'))(100) 
+plot(snow.multitemp, col=cl)
+
+# load name.RData
+# import the prediction image
+
+prediction <- raster("predicted.2025.norm.tif")
+plot(prediction, col=cl)
+
+# export the output (you made the calculation and you want to send the output to a colleague)
+writeRaster(prediction, "final.tif")
+
+# final stack
+final.stack <- stack(snow.multitemp, prediction)
+plot(final.stack,col=cl)
+
+# export the R graph
+pdf("my_final_exciting_graph.pdf")
+plot(final.stack, col=cl)
+dev.off()
+
+# make a .png of the project
+png("my_final_exciting_graph.pdf")
+plot(final.stack, col=cl)
+dev.off()
