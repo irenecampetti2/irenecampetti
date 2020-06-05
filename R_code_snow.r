@@ -76,3 +76,7 @@ dev.off()
 png("my_final_exciting_graph.pdf")
 plot(final.stack, col=cl)
 dev.off()
+
+# plot datas of 2010 and 2020 
+plot(snow.multitemp$snow2010r, snow.multitemp$snow2020r)
+abline(0,1, col="red")
