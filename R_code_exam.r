@@ -200,11 +200,12 @@ setwd("C:/lab/")
 
 library(raster)
 
-# Create a multi-layer raster object using brick() from a multi-layer file
+# Create a multi-layer raster object using brick() from a multi-layer file -- RGB colors
 p224r63_2011 <- brick("p224r63_2011_masked.grd")
 
 plot(p224r63_2011)
 
+# Bands of Landsat
 # B1: blue
 # B2: green
 # B3: red
@@ -214,14 +215,15 @@ plot(p224r63_2011)
 cl <- colorRampPalette(c('black','grey','light grey'))(100) # (100) is for the saturation of colors 
 plot(p224r63_2011, col=cl)
 
-# multiframe of different plots
+# Multiframe of different plots
+# par() is used to put several graphs in a single plot, mfrow defines the matrix
 par(mfrow=c(2,2))
+
 # B1: blue
 clb <- colorRampPalette(c('dark blue','blue','light blue'))(100)
 plot(p224r63_2011$B1_sre, col=clb)
 
-# Exercise: do the same with the green band
-
+# Exercise: do the same with the green band B2
 clg <- colorRampPalette(c('dark green','green','light green'))(100)
 plot(p224r63_2011$B2_sre, col=clg)
 
@@ -234,27 +236,8 @@ cln <- colorRampPalette(c('red','orange','yellow'))(100)
 plot(p224r63_2011$B4_sre, col=cln)
 
 
-par(mfrow=c(4,1))
-# B1: blue
-clb <- colorRampPalette(c('dark blue','blue','light blue'))(100)
-plot(p224r63_2011$B1_sre, col=clb)
-
-# Exercise: do the same with the green band
-
-clg <- colorRampPalette(c('dark green','green','light green'))(100)
-plot(p224r63_2011$B2_sre, col=clg)
-
-# B3: red
-clr <- colorRampPalette(c('dark red','red','pink'))(100)   # light red does not exist
-plot(p224r63_2011$B3_sre, col=clr)
-
-# B4: NIR
-cln <- colorRampPalette(c('red','orange','yellow'))(100)
-plot(p224r63_2011$B4_sre, col=cln)
-
-
-# plotRGB
-plotRGB(p224r63_2011, r=3, g=2, b=1, stretch="Lin")
+# plotRGB() plots three layers representing the different bandwidths of the electromagnetic spectrum (r,g,b) 
+plotRGB(p224r63_2011, r=3, g=2, b=1, stretch="Lin") # stretch increases the contrast of the image, linear stretch
 plotRGB(p224r63_2011, r=4, g=3, b=2, stretch="Lin")
 
 # Exercise: put NIR on top of the G component
@@ -263,12 +246,17 @@ plotRGB(p224r63_2011, r=3, g=4, b=2, stretch="Lin")
 #######
 
 setwd("C:/lab/")
+
+# Load the saved workspace
 load("rs.RData")
 ls()
 
 library(raster)
-p224r63_1988 <- brick("p224r63_1988_masked.grd")
 
+# Use 1988 data to make a multitemporal comparison
+# masked in the image is because there is no data where there was water
+# brick() imports the whole package of different bands
+p224r63_1988 <- brick("p224r63_1988_masked.grd")
 plot(p224r63_1988)
 
 # Exercise: plot in visible RGB 321 both images
@@ -278,21 +266,25 @@ plotRGB(p224r63_1988, r=3, g=2, b=1, stretch="Lin")
 plotRGB(p224r63_2011, r=3, g=2, b=1, stretch="Lin")
 
 # Exercise: plot in false colour 432 both images
+# 4 is for NIR
 par(mfrow=c(2,1))
 plotRGB(p224r63_1988, r=4, g=3, b=2, stretch="Lin")
 plotRGB(p224r63_2011, r=4, g=3, b=2, stretch="Lin")
 
 # Enhance the noise
 par(mfrow=c(2,1))
-plotRGB(p224r63_1988, r=4, g=3, b=2, stretch="Hist")
+plotRGB(p224r63_1988, r=4, g=3, b=2, stretch="Hist") # histogram stretch
 plotRGB(p224r63_2011, r=4, g=3, b=2, stretch="Hist")
+# higher noise is observed in 1988, due to humidity
 
 
 # B1: blue
 # B2: green
-# B3: red
-# B4: NIR
-dvi2011 <- p224r63_2011$B4_sre - p224r63_2011$B3_sre
+# B3: red: B3_sre (spectrum reflectance)
+# B4: NIR: B4_sre
+
+# Vegetation Index for 2011
+dvi2011 <- p224r63_2011$B4_sre - p224r63_2011$B3_sre # $ symbol links elements in R
 cl <- colorRampPalette(c('darkorchid3','light blue','lightpink4'))(100)
 plot(dvi2011, col=cl)
 
@@ -305,17 +297,24 @@ plot(dvi1988, col=clb)
 diff <- dvi2011 - dvi1988
 plot(diff)
 
-# Changing grain
-p224r63_2011res <- aggregate(p224r63_2011, fact=10)
+# Changing grain (dimension of the pixels)
+# aggregate() image + factor, which is how much we want to increase the pixels dimension
+p224r63_2011res <- aggregate(p224r63_2011, fact=10) # from a pixel of 30 m to a pixel of 300 m
 p224r63_2011res100 <- aggregate(p224r63_2011, fact=100)
 
+# Plot by RGB them altogether, the first image and the ones with factor of 10 and factor of 100
 par(mfrow=c(3,1))
 plotRGB(p224r63_2011, r=4, g=3, b=2, stretch="Lin")
 plotRGB(p224r63_2011res, r=4, g=3, b=2, stretch="Lin")
 plotRGB(p224r63_2011res100, r=4, g=3, b=2, stretch="Lin")
 
+# By entering the name of the images you get the informations
 p224r63_2011
 p224r63_2011res
 p224r63_2011res100
-  
+ 
+##################################
+##################################
+
+# 6. R code 
 
