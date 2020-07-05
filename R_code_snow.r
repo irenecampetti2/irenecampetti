@@ -32,6 +32,7 @@ plot(snow2020,col=cl)
 
 # how to plot snow data with lapply
 # first of all we make a list of the files we are going to import
+setwd("C:/lab/snow/snow/")
 rlist <- list.files(pattern="snow")
 rlist
 import <- lapply(rlist,raster)
