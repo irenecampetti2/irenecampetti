@@ -33,7 +33,45 @@ plot(zinc,copper,col="green",pch=19,cex=2)
 ##################################
 ##################################
 
-# 2. R code spatial
+# 2. R code multipanel
+
+# Install GGally package, used for the function ggpairs()
+install.packages("GGally")
+
+# Require the packages we are going to use
+library(sp)
+library(GGally)
+
+data(meuse) # there is a dataset available named meuse
+attach(meuse)
+
+# Exercise: see the names of the variables and plot cadmium versus zinc
+# There are two ways to se the names of the variables:
+head(meuse) # shows first 6 lines of the dataset
+plot(cadmium,zinc)
+
+# add a change in symbol, color, size
+plot(cadmium,zinc,pch=15,col="red",cex=2)
+
+# Exercise: make make all the possible pairwise plots of the dataset
+# Instead of plotting each pair separately -- plot(x,zinc); plot(x,copper) ecc.. we can use the function pairs()
+pairs(meuse) # the output is a matrix of plots
+
+# Use the formula, starting with the symbol ~ . Each term will give a separate variable in the pairs plot
+pairs(~ cadmium + copper + lead + zinc, data=meuse)
+
+pairs(meuse[,3:6])
+
+# Exercise: prettify the graph
+pairs(meuse[,3:6],pch=8,col="blue",cex=0.5)
+
+# Use ggpairs() function in order to obtain better graphs
+ggpairs(meuse[,3:6])
+
+##################################
+##################################
+
+# 3. R code spatial
 # R code for spatial view of points
 
 library(sp)
@@ -83,7 +121,7 @@ plot(country, cases, las=1) # horizontal labels
 plot(country, cases, las=2) # perpendicular labels
 plot(country, cases, las=3) # vertical labels
 
-plot(country, cases, las=3, cex.axis=0.5) # cex.axis -- change the size of labels
+plot(country, cases, las=3, cex.axis=0.5) # cex.axis -- change the size of text for x axis, 50% smaller
 plot(country, cases, las=3, cex.axis=0.7)
 
 # install ggplot2 package
@@ -97,16 +135,47 @@ load("spatial.RData")
 # list objects in the dataset
 ls()
 
-library(ggplot2)  # also require(ggplot2)
+library(ggplot2)  # also require(ggplot2) can be used
 
 # load mpg data
 data(mpg)
+# show first rows of the dataset
 head(mpg)
 
-#key components: data, aes, geometry
+# to make graphs with ggplot we need three key components: dataset, aesthetich mapping (the variables we want to put in the graph), geometry
 ggplot(mpg, aes(x=displ, y=hwy)) + geom_point()
 ggplot(mpg, aes(x=displ, y=hwy)) + geom_line()
 ggplot(mpg, aes(x=displ, y=hwy)) + geom_polygon()
 
+# in our case the dataset is covid, we want to relate country x cases, and we are using point as geometry
 head(covid)
 ggplot(covid, aes(x=lon, y=lat, size=cases)) + geom_point()
+
+##################################
+##################################
+
+# R code for multivariate analysis
+
+library(vegan)
+setwd("C:/lab/")
+
+biomes <- read.table("biomes.csv", header=T, sep=",")
+head(biomes) # view(biomes), biomes are also good
+
+# DEtrended CORrespondence ANAlysis
+multivar <- decorana(biomes) 
+plot(multivar)
+multivar
+
+plot(multivar)
+biomes_types <- read.table("biomes_types.csv", header=T, sep=",")
+head(biomes_types)
+
+attach(biomes_types)
+ordiellipse(multivar, type, col=1:4, kind = "ehull", lwd=3)
+
+# Also col="blue", "red", "green", "black")
+
+ordispider(multivar, type, col=1:4, label= TRUE)
+
+
