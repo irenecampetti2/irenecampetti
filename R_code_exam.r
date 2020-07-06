@@ -506,10 +506,10 @@ p224r63_2011 <- brick("p224r63_2011_masked.grd")
 # b6: thermal infrared
 # b7: SWIR
 # b8: panchromatic
-
+# Plot RGB
 plotRGB(p224r63_2011, r=5, g=4, b=3, stretch="Lin")
 
-# with ggplot
+# with ggplot, ggRGB() creates ggplot2 plot with RGB
 library("ggplot2")
 ggRGB(p224r63_2011,5,4,3)
 
@@ -522,25 +522,29 @@ par(mfrow=c(1,2))
 plotRGB(p224r63_1988, r=5, g=4, b=3, stretch="Lin")
 plotRGB(p224r63_2011, r=5, g=4, b=3, stretch="Lin")
 
-names(p224r63_2011)
+names(p224r63_2011) # get the names of the objects
 
 # check correlation
 dev.off()
 plot(p224r63_2011$B1_sre, p224r63_2011$B3_sre)
 
-# PCA
-# dicrease the resolution
+# PCA principal component analysis
+# decrease the resolution
 p224r63_2011_res <- aggregate(p224r63_2011, fact=10)
 p224r63_2011_pca <- rasterPCA(p224r63_2011_res)
 
 # check the properties of the pca
 p224r63_2011_pca
 
-#link the map to the pca
+# link the map to the pca
+# make a color ramp palette named cl
 cl <- colorRampPalette(c('dark grey','grey','light grey'))(100)
 plot(p224r63_2011_pca$map, col=cl)
 
+# summary of the various models                    
 summary(p224r63_2011_pca$model)
+                    
+# make a matrix of scateerplots                    
 pairs(p224r63_2011)
 
 # plotRGB, the names of the component are found in the map properties
@@ -558,4 +562,4 @@ difpca <- p224r63_2011_pca$map - p224r63_1988_pca$map
 plot(difpca)
 
 cldif <- colorRampPalette(c('blue','black','yellow'))(100)
-plot(difpca$PC1,col=cldif)
+plot(difpca$PC1,col=cldif) # link difpca and PC1
