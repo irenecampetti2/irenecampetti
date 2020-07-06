@@ -563,3 +563,128 @@ plot(difpca)
 
 cldif <- colorRampPalette(c('blue','black','yellow'))(100)
 plot(difpca$PC1,col=cldif) # link difpca and PC1
+
+##################################
+##################################
+          
+# 9. R code radiance
+                    
+# bit example
+library(raster)
+
+# create data with 2 columns and 2 rows
+toy <- raster(ncol=2, nrow=2, xmn=1, xmx=2, ymn=1, ymx=2)
+values(toy) <- c(1.13,1.44,1.55,3.4)
+
+plot(toy)
+text(toy, digits=2)
+
+toy2bits <- stretch(toy,minv=0,maxv=3)
+
+# avoid decimal degrees, make use of integer
+storage.mode(toy2bits[]) = "integer"
+plot(toy2bits)
+text(toy2bits, digits=2)
+
+# increase the amount of bits
+toy4bits <- stretch(toy,minv=0,maxv=15)
+storage.mode(toy4bits[]) = "integer"
+plot(toy4bits)
+text(toy4bits, digits=2)
+ 
+toy8bits <- stretch(toy,minv=0,maxv=255)
+storage.mode(toy8bits[]) = "integer"
+plot(toy8bits)
+text(toy8bits, digits=2)
+
+# plot altogether
+par(mfrow=c(1,4))
+plot(toy)
+text(toy, digits=2)
+plot(toy2bits)
+text(toy2bits, digits=2)
+plot(toy4bits)
+text(toy4bits, digits=2)
+plot(toy8bits)
+text(toy8bits, digits=2)
+
+#####################
+
+setwd("C:/lab/")
+load("faPAR.RData")
+library(raster)
+library(rasterdiv)
+
+# see data
+ls()
+faPAR10
+
+#let's see how much space is needed for the 8-bit set
+writeRaster(copNDVI, "copNDVI.tif")
+
+#faPAR: levelplot this set
+library(rasterVis)
+levelplot(faPAR10)
+          
+##################################
+##################################
+                    
+# 10. R code faPAR
+                    
+# how to look at chemical cycles from satellites
+
+library(raster)
+library(rasterVis)
+library(rasterdiv)
+
+plot(copNDVI)
+copNDVI <- reclassify(copNDVI,cbind(253:255, NA))
+levelplot(copNDVI)
+
+setwd("C:/lab/")
+
+# import the data                   
+faPAR10 <- raster("faPAR10.tif")
+levelplot(faPAR10)
+
+# save as a .pdf
+pdf("copNDVI.pdf")
+levelplot(copNDVI)
+dev.off()
+pdf("faPAR10.pdf")
+levelplot(faPAR10)
+dev.off()
+
+####
+# regression model between faPAR and NDVI
+# amount of erosion and heavy metals
+erosion <- c(12,14,16,24,26,40,55,67)
+hm <- c(30,100,150,200,260,340,460,600)
+
+plot(erosion, hm, col="red", pch=19, xlab="erosion", ylab="heavy metals", cex=2)
+model1 <- lm(hm ~ erosion) # fitting linear model, used for regression
+summary(model1)
+abline(model1) # adds a straight line through the current plot
+
+library(raster)
+library(rasterdiv)
+libray(sf)
+setwd("C:/lab/")
+                    
+faPAR10<-raster("faPAR10.tif")
+plot(faPAR10)
+plot(copNDVI)
+
+copNDVI <- reclassify(copNDVI,cbind(253:255,NA),right=TRUE)
+                    
+random.points <- function(raster,n)
+
+pts <- random.points(faPAR10,1000)
+copNDVIp <- extract(copNDVI, pts)
+faPAR10p <- extract(faPAR10,pts)
+
+##################################
+##################################
+                    
+# 11. R code EBVs
+# essential biodiversity variables
