@@ -299,7 +299,7 @@ p224r63_2011 <- brick("p224r63_2011_masked.grd")
 
 plot(p224r63_2011)
 
-# Bands of Landsat
+# Bands of Landset
 # B1: blue
 # B2: green
 # B3: red
@@ -410,5 +410,152 @@ p224r63_2011res100
 ##################################
 ##################################
 
-# 7. R code 
+# 7. R code for ecosystem functions
 
+# R code to view biomass over the world map and calculate changes in ecosystem functions and services
+# We are going to use Raster
+# Raster is the format of pixels - all data based on pixels
+
+install.packages("rasterdiv") 
+install.packages("rasterVis") 
+library(rasterdiv)
+library(rasterVis)
+
+# Attach the dataset copNDVI
+data(copNDVI)
+
+# Plot the dataset
+plot(copNDVI)
+
+# We can now make additional graphs on the world map. We should remove some values by using cbind. Remove the values from the 253 to 255
+# Put this data as NA value
+# Reclassify the data into copNDVI
+copNDVI<-reclassify(copNDVI,cbind(253:255,NA)
+
+levelplot(copNDVI) # draws contour plots
+
+# Lets change the grain of the images: let's aggregate the NDVI
+# Increase the pixel dimension by factor of 10
+# Let's give a new name to the image: copNDVI10
+copNDVI10 <- aggregate(copNDVI, fact=10)
+
+# fact=100 blurry image
+copNDVI100<-aggregate(copNDVI,fact=100)
+
+##################
+
+setwd("C:/lab/")
+library(raster)
+
+# Import RGB images and name them defor1 and defor2
+defor1<-brick("defor1_.jpg")
+defor2<-brick("defor2_.jpg")
+
+# Bands of landset 
+# B1: NIR
+# B2: RED
+# B3: GREEN
+plotRGB(defor1, r=1, g=2, b=3, stretch="Lin")
+plotRGB(defor2, r=1, g=2, b=3, stretch="Lin")
+                    
+par(mfrow=c(1,2))
+plotRGB(defor1, r=1, g=2, b=3, stretch="Lin")
+plotRGB(defor2, r=1, g=2, b=3, stretch="Lin")
+
+dvi1<-defor1$defor1_.1-defor1$defor1_.2
+dvi2<-defor2$defor2_.1-defor2$defor2_.2
+                    
+# Change the color ramp palletes of the plots
+# Assign the color ramp pallet to the name cl
+cl<-colorRampPalette(c("darkblue","yellow","red","black"))(100) 
+par(mfrow=c(1,2))
+plot(dvi1,col=cl)
+plot(dvi2,col=cl)
+
+difdvi<- dvi1-dvi2
+
+dev.off()
+
+# Change the color ramp palletes of the plots. Assign the color ramp pallet to the name cld
+cld<- colorRampPalette(c("blue","white","red"))(100) 
+plot(difdvi, col=cld)
+
+# Use a histogram stretch: "hist"
+# This function enhances the noise. 
+hist(difdvi)
+
+##################################
+##################################
+                    
+# 8. R code pca remote sensing
+                    
+setwd("C:/lab/")
+
+library(raster)
+library(RStoolbox)
+
+# use brick for satellite images
+p224r63_2011 <- brick("p224r63_2011_masked.grd")
+
+
+# b1: blue
+# b2: green
+# b3: red
+# b4: NIR
+# b5: SWIR
+# b6: thermal infrared
+# b7: SWIR
+# b8: panchromatic
+
+plotRGB(p224r63_2011, r=5, g=4, b=3, stretch="Lin")
+
+# with ggplot
+library("ggplot2")
+ggRGB(p224r63_2011,5,4,3)
+
+# do the same for 1988 image
+p224r63_1988 <- brick("p224r63_1988_masked.grd")
+plotRGB(p224r63_1988, r=5, g=4, b=3, stretch="Lin")
+
+# plot the two images one beside the other
+par(mfrow=c(1,2))
+plotRGB(p224r63_1988, r=5, g=4, b=3, stretch="Lin")
+plotRGB(p224r63_2011, r=5, g=4, b=3, stretch="Lin")
+
+names(p224r63_2011)
+
+# check correlation
+dev.off()
+plot(p224r63_2011$B1_sre, p224r63_2011$B3_sre)
+
+# PCA
+# dicrease the resolution
+p224r63_2011_res <- aggregate(p224r63_2011, fact=10)
+p224r63_2011_pca <- rasterPCA(p224r63_2011_res)
+
+# check the properties of the pca
+p224r63_2011_pca
+
+#link the map to the pca
+cl <- colorRampPalette(c('dark grey','grey','light grey'))(100)
+plot(p224r63_2011_pca$map, col=cl)
+
+summary(p224r63_2011_pca$model)
+pairs(p224r63_2011)
+
+# plotRGB, the names of the component are found in the map properties
+plotRGB(p224r63_2011_pca$map, r=1,g=2,b=3, stretch="Lin")
+
+# do the procedure for p224r63_1988
+p224r63_1988_res <- aggregate(p224r63_1988, fact=10)
+p224r63_1988_pca <- rasterPCA(p224r63_1988_res)
+plot(p224r63_1988_pca$map)
+summary(p224r63_1988_pca$model)
+pairs(p224r63_1988)
+
+# plot the difference in all bands: difference in the pca
+difpca <- p224r63_2011_pca$map - p224r63_1988_pca$map
+plot(difpca)
+
+cldif <- colorRampPalette(c('blue','black','yellow'))(100)
+plot(difpca$PC1,col=cldif)
