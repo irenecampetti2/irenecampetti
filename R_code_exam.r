@@ -782,7 +782,8 @@ plot(sd_clad_agg, col=cl)
 ##################################
                     
 # 12. R code snow
-                    setwd("C:/lab/")
+                   
+setwd("C:/lab/")
 
 install.packages("ncdf4")
 library(ncdf4)
@@ -794,10 +795,11 @@ cl <- colorRampPalette(c('darkblue','blue','light blue'))(100)
 # Exercise: plot snow cover with the cl palette
 plot(snowmay,col=cl)
 
-##### import snow data
-
+# import snow data
+# set the working directory: folder where all the images are
 setwd("C:/lab/snow")
-
+                    
+# perform raster() and plot() for each image separately --> time consuming way
 snow2000 <- raster("snow2000r.tif")
 snow2005 <- raster("snow2005r.tif")
 snow2010 <- raster("snow2010r.tif")
@@ -811,11 +813,12 @@ plot(snow2010,col=cl)
 plot(snow2015,col=cl)
 plot(snow2020,col=cl)
 
-# how to plot snow data with lapply
+# how to plot snow data with lapply --> fast way
+setwd("C:/lab/snow/snow/") # working directory: folder containing only the images
 # first of all we make a list of the files we are going to import
-setwd("C:/lab/snow/snow/")
-rlist <- list.files(pattern="snow")
+rlist <- list.files(pattern="snow") # pattern: picks all the files with "snow" in their names
 rlist
+# import all the images in the list 
 import <- lapply(rlist,raster)
 snow.multitemp <- stack(import)
 plot(snow.multitemp,col=cl)
@@ -826,7 +829,7 @@ source("prediction.r")
 #######################
 
 # set working directory
-setwd("C:/lab/snow/")
+setwd("C:/lab/snow/snow")
 
 # Exercise: import the snow cover images altogether
 library(raster)
@@ -836,9 +839,7 @@ snow.multitemp <- stack(import)
 cl <- colorRampPalette(c('darkblue','blue','light blue'))(100) 
 plot(snow.multitemp, col=cl)
 
-# load name.RData
-# import the prediction image
-
+# import the prediction image for 2025 and plot it with color ramp palette
 prediction <- raster("predicted.2025.norm.tif")
 plot(prediction, col=cl)
 
@@ -849,7 +850,7 @@ writeRaster(prediction, "final.tif")
 final.stack <- stack(snow.multitemp, prediction)
 plot(final.stack,col=cl)
 
-# export the R graph
+# export the R graph in .pdf
 pdf("my_final_exciting_graph.pdf")
 plot(final.stack, col=cl)
 dev.off()
@@ -862,3 +863,53 @@ dev.off()
 # plot datas of 2010 and 2020 
 plot(snow.multitemp$snow2010r, snow.multitemp$snow2020r)
 abline(0,1, col="red")
+                    
+##################################
+##################################
+                    
+# 13. R code NO2
+# air pollution in time
+                    
+# set the working direcotry
+setwd("C:/lab/no2/")
+                    
+library(raster)
+
+# create a list of the images that we want to import
+rlist <- list.files(pattern="EN")
+
+# import images in the list, perform stack and add the color ramp palette
+import <- lapply(rlist,raster)
+EN <- stack(import)
+cl <- colorRampPalette(c('red','orange','yellow'))(100) #
+plot(EN, col=cl)
+
+# situation in january and march
+par(mfrow=c(1,2))
+plot(EN$EN_0001, col=cl)
+plot(EN$EN_0013, col=cl)
+
+# RGB space
+plotRGB(EN, r=1, g=7, b=13, stretch="lin")
+
+# difference map between the two situations
+dif <- EN$EN_0013 - EN$EN_0001
+cld <- colorRampPalette(c('blue','white','red'))(100) # 
+plot(dif, col=cld)
+
+# quantitative estimate box plot
+boxplot(EN)
+# to remove the outline
+boxplot(EN,outline=F)
+# make the box plot horizontal
+boxplot(EN,outline=F,horizontal=T,axes=T)
+
+# plot the data of the first image with the data of the last image
+plot(EN$EN_0001,EN$EN_0013)
+#abline a=0, b=1
+abline(0,1,col="red")
+
+##################################
+##################################
+                    
+# 14. R code interpolation of students' data
