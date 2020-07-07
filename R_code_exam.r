@@ -688,3 +688,177 @@ faPAR10p <- extract(faPAR10,pts)
                     
 # 11. R code EBVs
 # essential biodiversity variables
+                    
+library(raster)
+library(RStoolbox) # this is for PCA
+
+setwd("C:/lab/") 
+                    
+snt <- brick("snt_r10.tif")
+plot(snt)
+
+# B1 blue
+# B2 green
+# B3 red
+# B4 NIR
+
+# R3 G2 B1
+plotRGB(snt,3,2,1, stretch="lin") 
+                    
+# make use of NIR
+plotRGB(snt,4,3,2, stretch="lin") 
+
+pairs(snt) # scatterplots for each combination of variables 
+
+### PCA analysis
+sntpca <- rasterPCA(snt)
+sntpca
+
+summary(sntpca$model)
+# 70% of information
+# plot pca with map
+plot(sntpca$map) 
+
+plotRGB(sntpca$map, 1, 2, 3, stretch="lin")
+
+# set the moving window
+# create a matrix first
+window <- matrix(1, nrow = 5, ncol = 5)
+window
+# calculate values for neighborhood of focal cells
+# focal(linking the main elements, matrix, function) 
+sd_snt <- focal(sntpca$map$PC1, w=window, fun=sd)
+cl <- colorRampPalette(c('dark blue','green','orange','red'))(100) # 
+plot(sd_snt, col=cl)
+
+par(mfrow=c(1,2))
+plotRGB(snt,4,3,2, stretch="lin", main="original image") 
+plot(sd_snt, col=cl, main="diversity")
+
+##########################
+
+# Cladonia stellaris example
+                    
+setwd("C:/lab/")
+
+# import the image, RGB layers
+library(raster)
+clad <- brick("cladonia_stellaris_calaita.JPG")
+plotRGB(clad,1,2,3,stretch="lin")
+
+# make a 3x3 matrix
+window <- matrix(1, nrow=3, ncol=3)
+window
+
+# we want to calculate values for the neighborhood of focal cells --> focal()
+                    
+pairs(clad)
+
+# PCA
+library(RStoolbox)
+cladpca <- rasterPCA(clad)
+cladpca
+
+summary(cladpca$model)
+# 98%
+
+plotRGB(cladpca$map,1,2,3,stretch="lin")
+
+# now we can calculate the values
+sd_clad <- focal(cladpca$map$PC1, w=window, fun=sd)
+
+# PC1 aggregate
+PC1_agg <- aggregate(cladpca$map$PC1, fact=10)
+sd_clad_agg <- focal(PC1_agg, w=window, fun=sd)
+
+# multiframe graph
+# plot the calculation
+par(mfrow=c(1,2))
+cl <- colorRampPalette(c('yellow','violet','black'))(100) 
+plot(sd_clad, col=cl)
+plot(sd_clad_agg, col=cl)
+                    
+##################################
+##################################
+                    
+# 12. R code snow
+                    setwd("C:/lab/")
+
+install.packages("ncdf4")
+library(ncdf4)
+library(raster)
+
+snowmay <- raster("c_gls_SCE_202005260000_NHEMI_VIIRS_V1.0.1.nc")
+cl <- colorRampPalette(c('darkblue','blue','light blue'))(100) 
+
+# Exercise: plot snow cover with the cl palette
+plot(snowmay,col=cl)
+
+##### import snow data
+
+setwd("C:/lab/snow")
+
+snow2000 <- raster("snow2000r.tif")
+snow2005 <- raster("snow2005r.tif")
+snow2010 <- raster("snow2010r.tif")
+snow2015 <- raster("snow2015r.tif")
+snow2020 <- raster("snow2020r.tif")
+
+par(mfrow=c(2,3))
+plot(snow2000,col=cl)
+plot(snow2005,col=cl)
+plot(snow2010,col=cl)
+plot(snow2015,col=cl)
+plot(snow2020,col=cl)
+
+# how to plot snow data with lapply
+# first of all we make a list of the files we are going to import
+setwd("C:/lab/snow/snow/")
+rlist <- list.files(pattern="snow")
+rlist
+import <- lapply(rlist,raster)
+snow.multitemp <- stack(import)
+plot(snow.multitemp,col=cl)
+
+# let's make a prediction on how the snow is expected to change in 2025
+source("prediction.r")
+
+#######################
+
+# set working directory
+setwd("C:/lab/snow/")
+
+# Exercise: import the snow cover images altogether
+library(raster)
+rlist <- list.files(pattern="snow")
+import <- lapply(rlist,raster)
+snow.multitemp <- stack(import)
+cl <- colorRampPalette(c('darkblue','blue','light blue'))(100) 
+plot(snow.multitemp, col=cl)
+
+# load name.RData
+# import the prediction image
+
+prediction <- raster("predicted.2025.norm.tif")
+plot(prediction, col=cl)
+
+# export the output (you made the calculation and you want to send the output to a colleague)
+writeRaster(prediction, "final.tif")
+
+# final stack
+final.stack <- stack(snow.multitemp, prediction)
+plot(final.stack,col=cl)
+
+# export the R graph
+pdf("my_final_exciting_graph.pdf")
+plot(final.stack, col=cl)
+dev.off()
+
+# make a .png of the project
+png("my_final_exciting_graph.pdf")
+plot(final.stack, col=cl)
+dev.off()
+
+# plot datas of 2010 and 2020 
+plot(snow.multitemp$snow2010r, snow.multitemp$snow2020r)
+abline(0,1, col="red")
