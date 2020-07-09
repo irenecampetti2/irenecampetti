@@ -912,4 +912,92 @@ abline(0,1,col="red")
 ##################################
 ##################################
                     
-# 14. R code interpolation of students' data
+# 14. R code zoom and crop functions
+                    
+# set my working directory to the lab folder
+setwd("C:/lab/")
+                    
+# we are going to see two possibilities on how to make use of a specified part of a downloaded data
+# we can use a particular part of the data instead of global perspective 
+# recall the libraries needed
+library(raster)
+library(ncdf4)
+                    
+# import data and name it snow
+snow <- raster("c_gls_SCE_202005260000_NHEMI_VIIRS_V1.0.1.nc")
+                  
+# make a color ramp palette ranging from dark blue to light blue
+cl <- colorRampPalette(c('darkblue','blue','light blue'))(100)
+                    
+# we have to specify which extent we want to zoom in, in the data/image 
+# in our case we zoom on Italy --> the first two numbers are ranging in longitude, the last two numbers are ranging in latitude
+# assign it the name ext
+ext <- c(0, 20, 35, 50)
+# use function zoom(), specifyng the image and the extension
+zoom(snow, ext=ext)
+                    
+# use crop() naming it snowitaly
+snowitaly <- crop(snow, ext)
+plot(snowitaly, col=cl)
+                    
+# other example with zoom() using drawExtent by clicking on the map and drawing a rectangular that will be our zoom
+zoom(snow, ext=drawExtent())
+                    
+##################################
+##################################
+                    
+# 15. R code interpolation with students' data
+                    
+setwd("C:/lab/")
+# import data, it is a table
+# assign it the name inp
+library(spatstat)
+inp <- read.table("dati_plot55_LAST3.csv", sep=";", head=T) # separation is the symbol ;
+head(inp)
+attach(inp) # by attaching the dataset, we can work directly in it
+# we can make directly use of the columns X and Y
+plot(X,Y)
+                    
+# in order to know the minimum and maximum values make use of summary()
+summary(inp)
+inppp <- ppp(x=X, y=Y, c(716000,718000),c(4859000,4861000))
+# see the name of the columns
+names(inp)
+                    
+# we want to make estimations of the tree coverage --> Canopy.cov
+marks(inppp) <- Canopy.cov
+# smooth() for interpolation. Estimates data where it has not yet been measured
+# assign the name canopy
+canopy<-Smooth(inppp)
+plot(canopy)
+points(inppp, col="green")
+# southern part is more dense
+marks(inppp) <- cop.lich.mean
+lichs <- Smooth(inppp)
+plot(lichs)
+points(inppp)
+       
+# plot the maps together to compare them
+par(mfrow=c(1,2))
+plot(canopy)
+points(inppp)
+plot(lichs)
+points(inppp)              
+ 
+# now plot the three maps together
+par(mfrow=c(1,3))
+plot(canopy)
+points(inppp)
+plot(lichs)
+points(inppp)
+plot(Canopy.cov, cop.lich.mean, col="red", pch=19, cex=2)
+
+#############
+                    
+                    
+                    
+                    
+                    
+                    
+
+                    
