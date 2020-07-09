@@ -992,7 +992,108 @@ plot(lichs)
 points(inppp)
 plot(Canopy.cov, cop.lich.mean, col="red", pch=19, cex=2)
 
+dev.off()
+                    
 #############
+                    
+# Dati Psammofile
+         
+# we are going to read the dataset, giving it the name inp.psam
+# include header and separator ;
+inp.psam<-read.table("dati_psammofile.csv",sep=";", head=T)
+attach(inp.psam)
+head(inp.psam)
+summary(inp.psam)
+                    
+# by reading the coordinates we can see that we are in the north east of Italy
+# X-value: E 
+# Y-value: N
+plot(E,N)  
+inp.psam.ppp <- ppp(x=E,y=N,c(356450,372240),c(5059800,5064150))
+                    
+# we are going to make use of the variable organic carbon C_org
+marks(inp.psam.ppp) <- C_org
+                    
+# we estimate values for the points we don't have measured values for
+C<-Smooth(inp.psam.ppp)
+plot(C)
+points(inp.psam.ppp)
+                    
+##################################
+##################################
+                    
+# 16. R code for species distribution modelling
+                    
+# install the needed packages and recall the libraries
+install.packages("sdm")
+
+library(sdm)
+library(raster) # for predictors
+library(rgdal) # for species
+
+# species data are in the folder "external" by downloading sdm
+# import the file
+file <- system.file("external/species.shp", package="sdm")
+
+# use the graphical part of the file
+species <- shapefile(file)
+plot(species)
+
+# species occurrence presence/absence
+# 1 for presence, 0 for absence
+species$Occurrence
+plot(species[species$Occurrence == 1,],col='blue',pch=16)
+points(species[species$Occurrence == 0,],col='red',pch=16)
+
+# import environmental variables/predictors
+path <- system.file("external", package="sdm")
+
+# make a list of the files
+lst <- list.files(path=path,pattern='asc$',full.names = T) 
+lst # shows the files listed and their path
+
+# put the predictors altogether with stack function
+preds <- stack(lst)
+plot(preds)
+
+# change colors
+cl <- colorRampPalette(c('blue','orange','red','yellow')) (100)
+plot(preds, col=cl)
+
+# show the distribution of Brachipodium rupestris according to each environmental variable
+# let's make use of elevation
+plot(preds$elevation, col=cl)
+points(species[species$Occurrence == 1,], pch=16)
+
+# make use of temperature
+plot(preds$temperature, col=cl)
+points(species[species$Occurrence == 1,], pch=16)
+
+# make use of precipitation 
+plot(preds$precipitation, col=cl)
+points(species[species$Occurrence == 1,], pch=16)
+
+# make use of vegetation
+plot(preds$vegetation, col=cl)
+points(species[species$Occurrence == 1,], pch=16)
+
+# model the sets species and predictors
+d <- sdmData(train=species, predictors=preds)
+d # see the data
+
+m1 <- sdm(Occurrence ~ elevation + precipitation + temperature + vegetation, data=d, methods = "glm")
+
+p1<- predict(m1, newdata=preds)
+
+# plot species and preds
+plot(p1, col=cl)
+points(species[species$Occurrence == 1,], pch=16)
+
+s1 <- stack(preds,p1)
+plot(s1, col=cl)
+
+                    
+             
                     
                     
                     
